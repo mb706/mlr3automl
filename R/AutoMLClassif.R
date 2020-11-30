@@ -9,7 +9,7 @@
 #' classification_model = AutoML(classification_task, learner_list, learner_timeout, resampling,
 #'                               measure, runtime, terminator, preprocessing, portfolio)
 #' ```
-#'
+#' # TODO_MB: It would be best to use roxygen templates here, since these parameters are mostly the same as in other classes / the AutoML() function, right?
 #' @param task ([`Task`][mlr3::Task]) \cr
 #' [`TaskClassif`][mlr3::TaskClassif] to be solved.
 #' @param learner_list (`list()` | `character()`) \cr
@@ -66,14 +66,13 @@ AutoMLClassif = R6Class(
     initialize = function(task, learner_list = NULL, learner_timeout = NULL,
                           resampling = NULL, measure = NULL, runtime = Inf, terminator = NULL,
                           preprocessing = NULL, portfolio = TRUE) {
-      checkmate::assert_r6(task, "TaskClassif")
+      assert_r6(task, "TaskClassif")
+      # TODO_MB: assert for learner_list, since we are at least doing `c()` operation on it before it is passed to super$initialize
       self$measure = measure %??% mlr_measures$get("classif.acc")
       # exclude cv_glmnet and svm by default, because they are slow
-      default_learners =  c("classif.ranger", "classif.xgboost", "classif.liblinear")
+      default_learners = c("classif.ranger", "classif.xgboost", "classif.liblinear")
       self$learner_list = learner_list %??% default_learners
-      if (!("classif.featureless" %in% self$learner_list)) {
-        self$learner_list = c(self$learner_list, "classif.featureless")
-      }
+      self$learner_list = unique(c(learner_list, "classif.featureless"))
       super$initialize(task = task, learner_list = self$learner_list,
                        learner_timeout = learner_timeout, resampling = resampling,
                        measure = self$measure, runtime = runtime, terminator = terminator,
