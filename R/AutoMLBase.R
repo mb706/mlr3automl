@@ -16,7 +16,8 @@
 #' model = AutoML(task, learner_list, learner_timeout, resampling, measure, runtime,
 #'                terminator, preprocessing, portfolio)
 #' ```
-#'
+#' # TODO_MB: use roxygen templates. also consider the amendments I did to AutoMLClassif.R
+#' # TODO_MB: learner_list: in the code it only accepts character, so the type description of it should only be `character`.
 #' @param task ([`Task`][mlr3::Task]) \cr
 #' Contains the task to be solved. Currently [`TaskClassif`][mlr3::TaskClassif] and [`TaskRegr`][mlr3::TaskRegr] are supported.
 #' @param learner_list (`list()` | `character()`) \cr
@@ -141,8 +142,8 @@ AutoMLBase = R6Class("AutoMLBase",
 
       self$runtime = assert_number(runtime, lower = 0)
       self$learner_timeout = assert_number(learner_timeout, lower = 0, null.ok = TRUE) %??% runtime / 5  # maybe choose a larger divisor here
-      self$tuning_terminator = terminator %??% trm("none")
-      self$portfolio = assert_logical(portfolio, len = 1)
+      self$tuning_terminator = terminator %??% trm("none")  # TODO_MB: just have `trm("none")` as default value for tuning_terminator in the function header.
+      self$portfolio = assert_logical(portfolio, len = 1)  # TODO_MB: use assert_flag. or are you accepting NA-values on purpose here?
 
       self$tuner = tnr("hyperband", eta = 3)
       self$learner = private$.get_default_learner()
@@ -157,12 +158,14 @@ AutoMLBase = R6Class("AutoMLBase",
         warning("An error occured during training. Fallback learner was used!")
         print(self$learner$learner$errors)
       }
+      # TODO_MB: consider `return(invisible(self))` here
     },
     #' @description
     #' Returns a [Prediction][mlr3::Prediction] object for the given data based on the trained model.
-    #' @param data ([data.frame] | [data.table] | [Task][mlr3::Task]) \cr
+    #' @param data (`data.frame` | [`data.table`][data.table::data.table] | [Task][mlr3::Task]) \cr
     #' New observations to be predicted. If `NULL`, defaults to the task the model
     #' was trained on.
+    #' TODO_MB: does it make sense to predict on training data? One of our tenets in ML is that training set predictions are basically useless for performance evaluation
     #' @param row_ids (`integer()`) \cr
     #' Vector of training indices.
     #' @return [`PredictionClassif`][mlr3::PredictionClassif] | [`PredictionRegr`][mlr3::PredictionRegr]
@@ -175,6 +178,7 @@ AutoMLBase = R6Class("AutoMLBase",
     },
     #' @description
     #' Performs nested resampling. [`ResamplingHoldout`][mlr3::ResamplingHoldout] is used for the outer resampling.
+    #' # TODO_MB: consider making outer resampling an argument, with `rsmp("holdout")` as default
     #' @return [`ResampleResult`][mlr3::ResampleResult]
     resample = function() {
       outer_resampling = rsmp("holdout")
