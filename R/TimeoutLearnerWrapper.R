@@ -231,7 +231,7 @@ OptimizerChain = R6Class("OptimizerChain", inherit = bbotk::Optimizer,
   )
 )
 
-TunerChain = R6Class("TunerRandomSearch",
+TunerChain = R6Class("TunerChain",
   inherit = mlr3tuning::TunerFromOptimizer,
   public = list(
     #' @description
